@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5f4bdb">
+  <meta name="description" content="Найди своего мультгероя и волонтёрское направление, в котором твои способности раскроются лучше всего.">
+  <title>Какой ты волонтёр?</title>
+  <style>
+    :root {
+      --ink: #25213b;
+      --muted: #6c6882;
+      --paper: #fffdf9;
+      --violet: #5f4bdb;
+      --violet-dark: #4533bd;
+      --mint: #35bfa1;
+      --yellow: #ffd567;
+      --coral: #ff806d;
+      --line: #e8e3f4;
+      --shadow: 0 24px 70px rgba(56, 43, 120, .16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 213, 103, .55) 0 7%, transparent 7.2%),
+        radial-gradient(circle at 92% 8%, rgba(53, 191, 161, .3) 0 10%, transparent 10.2%),
+        linear-gradient(135deg, #f4f0ff, #fff7ed 55%, #eefcf8);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      width: 230px;
+      height: 230px;
+      border-radius: 58% 42% 46% 54%;
+      filter: blur(1px);
+      opacity: .6;
+    }
+
+    body::before { left: -105px; bottom: -80px; background: #d9d0ff; transform: rotate(22deg); }
+    body::after { right: -90px; bottom: 8%; background: #ffd8d0; transform: rotate(-18deg); }
+
+    button { font: inherit; }
+
+    .shell {
+      width: min(940px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px 6px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      color: var(--violet-dark);
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      color: white;
+      background: var(--violet);
+      transform: rotate(-6deg);
+      box-shadow: 0 8px 18px rgba(95, 75, 219, .25);
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, .8);
+      border-radius: 30px;
+      background: rgba(255, 253, 249, .94);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; animation: rise .42s ease both; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      grid-template-columns: 1.05fr .95fr;
+      min-height: 570px;
+    }
+
+    .screen.hero.active { display: grid; }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(34px, 6vw, 68px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 7px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #4a3ab8;
+      background: #ede9ff;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin: 22px 0 18px;
+      font-size: clamp(42px, 7vw, 74px);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+
+    .accent { color: var(--violet); }
+
+    .lead {
+      margin-bottom: 28px;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.55;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .meta span {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 16px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+    }
+
+    .primary {
+      color: white;
+      background: var(--violet);
+      box-shadow: 0 12px 24px rgba(95, 75, 219, .27);
+    }
+
+    .primary:hover { transform: translateY(-2px); background: var(--violet-dark); }
+    .primary:focus-visible, .secondary:focus-visible, .answer:focus-visible { outline: 4px solid rgba(95, 75, 219, .22); outline-offset: 2px; }
+    .primary:disabled { cursor: not-allowed; opacity: .45; transform: none; box-shadow: none; }
+
+    .secondary {
+      color: var(--violet-dark);
+      border: 1px solid #d8d0ff;
+      background: white;
+    }
+
+    .hero-art {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+      padding: 34px;
+      color: white;
+      background: var(--violet);
+      overflow: hidden;
+    }
+
+    .hero-art::before,
+    .hero-art::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .14);
+    }
+
+    .hero-art::before { width: 360px; height: 360px; right: -120px; top: -80px; }
+    .hero-art::after { width: 260px; height: 260px; left: -90px; bottom: -70px; }
+
+    .orbit {
+      position: relative;
+      width: min(330px, 72vw);
+      aspect-ratio: 1;
+      border: 2px dashed rgba(255, 255, 255, .45);
+      border-radius: 50%;
+      animation: spin 26s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .orbit-icon {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      border-radius: 24px;
+      background: white;
+      box-shadow: 0 12px 24px rgba(30, 20, 92, .22);
+      font-size: 36px;
+      animation: counterspin 26s linear infinite;
+    }
+
+    @keyframes counterspin { to { transform: rotate(-360deg); } }
+    .orbit-icon:nth-child(1) { left: 50%; top: -38px; margin-left: -38px; }
+    .orbit-icon:nth-child(2) { right: -28px; top: 28%; }
+    .orbit-icon:nth-child(3) { right: 12%; bottom: -18px; }
+    .orbit-icon:nth-child(4) { left: 9%; bottom: -8px; }
+    .orbit-icon:nth-child(5) { left: -31px; top: 28%; }
+
+    .hero-center {
+      position: absolute;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 156px;
+      height: 156px;
+      border-radius: 46px;
+      color: var(--violet);
+      background: var(--yellow);
+      box-shadow: 0 20px 45px rgba(30, 20, 92, .28);
+      font-size: 75px;
+      transform: rotate(5deg);
+    }
+
+    .quiz-wrap { padding: clamp(24px, 5vw, 52px); }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 13px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .progress-track {
+      height: 10px;
+      margin-bottom: 40px;
+      border-radius: 999px;
+      background: #ebe7f3;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 11.11%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--violet), #8b72f2, var(--mint));
+      transition: width .35s ease;
+    }
+
+    .question {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .question h2 {
+      margin-bottom: 26px;
+      font-size: clamp(25px, 4vw, 38px);
+      line-height: 1.18;
+      letter-spacing: -.03em;
+    }
+
+    .answers { display: grid; gap: 12px; }
+
+    .answer {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: 64px;
+      padding: 13px 18px;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 650;
+      line-height: 1.35;
+      transition: border-color .16s ease, transform .16s ease, background .16s ease;
+    }
+
+    .answer:hover { transform: translateY(-1px); border-color: #b9aff2; }
+    .answer.selected { border-color: var(--violet); background: #f1eeff; }
+
+    .answer-key {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      color: var(--violet-dark);
+      background: #eeeaff;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .answer.selected .answer-key { color: white; background: var(--violet); }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      max-width: 760px;
+      margin: 28px auto 0;
+    }
+
+    .text-button {
+      padding: 10px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .text-button:disabled { visibility: hidden; }
+
+    .result-grid {
+      grid-template-columns: 1fr 1fr;
+      min-height: 610px;
+    }
+
+    .screen.result-grid.active { display: grid; }
+
+    .result-image-wrap { position: relative; min-height: 420px; background: #201b38; }
+    .result-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .result-image-wrap::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(22, 17, 46, .45), transparent 55%); pointer-events: none; }
+
+    .result-badge {
+      position: absolute;
+      z-index: 2;
+      left: 24px;
+      bottom: 24px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--yellow);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .result-copy { display: flex; flex-direction: column; justify-content: center; padding: clamp(32px, 5vw, 58px); }
+
+    .result-kicker { margin-bottom: 9px; color: var(--violet); font-weight: 850; }
+
+    .result-copy h2 {
+      margin-bottom: 18px;
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1;
+      letter-spacing: -.045em;
+    }
+
+    .result-copy h3 { margin: 0 0 18px; font-size: 21px; color: var(--mint); }
+    .result-description { color: var(--muted); line-height: 1.68; font-size: 17px; }
+
+    .superpower {
+      margin: 4px 0 26px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--coral);
+      border-radius: 0 14px 14px 0;
+      background: #fff2ef;
+      line-height: 1.5;
+      font-weight: 750;
+    }
+
+    .result-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .fineprint { margin: 18px 0 0; color: #8b879b; font-size: 12px; line-height: 1.45; }
+
+    @media (max-width: 760px) {
+      .shell { padding-top: 18px; }
+      .brand { margin-left: 2px; }
+      .card { border-radius: 24px; }
+      .hero, .result-grid { grid-template-columns: 1fr; }
+      .hero-copy { order: 2; }
+      .hero-art { min-height: 340px; }
+      .hero-center { width: 128px; height: 128px; font-size: 60px; border-radius: 38px; }
+      .orbit { width: 250px; }
+      .orbit-icon { width: 60px; height: 60px; border-radius: 19px; font-size: 28px; }
+      .orbit-icon:nth-child(1) { top: -30px; margin-left: -30px; }
+      .result-image-wrap { min-height: 390px; }
+      .result-image { aspect-ratio: 4 / 3; }
+    }
+
+    @media (max-width: 460px) {
+      .shell { width: min(100% - 16px, 940px); }
+      .hero-copy, .quiz-wrap, .result-copy { padding: 27px 22px; }
+      .hero-art { min-height: 300px; }
+      .answer { grid-template-columns: 32px 1fr; padding: 12px 13px; border-radius: 15px; }
+      .answer-key { width: 30px; height: 30px; }
+      .progress-track { margin-bottom: 28px; }
+      .result-image-wrap { min-height: 320px; }
+      .result-actions { display: grid; }
+      .result-actions button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand"><span class="brand-mark">♥</span><span>Студенческий волонтёрский центр</span></div>
+
+    <section id="start-screen" class="screen active card hero" aria-labelledby="main-title">
+      <div class="hero-copy">
+        <span class="eyebrow">мини-тест</span>
+        <h1 id="main-title">Какой ты <span class="accent">волонтёр?</span></h1>
+        <p class="lead">Найди своего мультгероя и направление, в котором твои способности раскроются лучше всего.</p>
+        <div class="meta"><span>9 вопросов</span><span>около 3 минут</span><span>без правильных ответов</span></div>
+        <button id="start-button" class="primary" type="button">Начать тест</button>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit">
+          <span class="orbit-icon">🌱</span><span class="orbit-icon">🎬</span><span class="orbit-icon">🐾</span><span class="orbit-icon">🎨</span><span class="orbit-icon">🤝</span>
+        </div>
+        <div class="hero-center">✨</div>
+      </div>
+    </section>
+
+    <section id="quiz-screen" class="screen card quiz-wrap" aria-live="polite">
+      <div class="progress-head"><span id="progress-label">Вопрос 1 из 9</span><span id="progress-percent">11%</span></div>
+      <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+      <div class="question">
+        <h2 id="question-title"></h2>
+        <div id="answers" class="answers" role="radiogroup"></div>
+      </div>
+      <div class="quiz-actions">
+        <button id="back-button" class="text-button" type="button">Назад</button>
+        <button id="next-button" class="primary" type="button" disabled>Дальше</button>
+      </div>
+    </section>
+
+    <section id="result-screen" class="screen card result-grid" aria-live="polite">
+      <div class="result-image-wrap">
+        <img id="result-image" class="result-image" src="" alt="">
+        <span id="result-badge" class="result-badge"></span>
+      </div>
+      <div class="result-copy">
+        <p class="result-kicker">Твой волонтёрский персонаж</p>
+        <h2 id="result-name"></h2>
+        <h3 id="result-direction"></h3>
+        <p id="result-description" class="result-description"></p>
+        <div id="result-superpower" class="superpower"></div>
+        <div class="result-actions">
+          <button id="share-button" class="primary" type="button">Поделиться результатом</button>
+          <button id="restart-button" class="secondary" type="button">Пройти ещё раз</button>
+        </div>
+        <p class="fineprint">Тест носит развлекательный характер и помогает присмотреться к разным направлениям волонтёрства.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const categories = {
+      event: {
+        name: 'Король Джулиан',
+        direction: 'Событийный волонтёр',
+        badge: 'События',
+        image: 'assets/julien.jpg',
+        description: 'Ты заряжаешь окружающих энергией и умеешь превращать обычный день в настоящее событие. Твои сильные стороны: инициативность, общительность, быстрая реакция и организаторские способности. Тебе подойдут форумы, фестивали, университетские праздники, соревнования и крупные акции.',
+        superpower: 'Твоя суперсила: создавать атмосферу, в которой хочется участвовать.'
+      },
+      eco: {
+        name: 'ВАЛЛ·И',
+        direction: 'Эковолонтёр',
+        badge: 'Экология',
+        image: 'assets/walle.png',
+        description: 'Ты замечаешь то, мимо чего другие проходят, и думаешь о последствиях своих действий. Твои сильные стороны: внимательность, последовательность и бережливость. Тебе подойдут экологические акции, раздельный сбор, озеленение и просветительские проекты.',
+        superpower: 'Твоя суперсила: делать мир чище без лишних слов.'
+      },
+      zoo: {
+        name: 'Айболит',
+        direction: 'Зооволонтёр',
+        badge: 'Забота о животных',
+        image: 'assets/aybolit.jpg',
+        description: 'У тебя большое сердце и особенное терпение к тем, кто не может рассказать о своих проблемах словами. Твои сильные стороны: доброта, ответственность и внимательность. Тебе подойдут помощь приютам, сбор кормов и лекарств, выгул животных и поиск хозяев.',
+        superpower: 'Твоя суперсила: заслуживать доверие даже самых осторожных хвостиков.'
+      },
+      donor: {
+        name: 'Бэймакс',
+        direction: 'Волонтёр донорского направления',
+        badge: 'Донорство',
+        image: 'assets/baymax.jpg',
+        description: 'Ты сохраняешь спокойствие там, где другие волнуются, и понимаешь, что один ответственный поступок может спасти жизнь. Твои сильные стороны: надёжность, осознанность и забота. Тебе подойдут донорские акции, регистрация участников и просвещение о донорстве.',
+        superpower: 'Твоя суперсила: помогать людям чувствовать себя спокойнее и увереннее.'
+      },
+      culture: {
+        name: 'Реми',
+        direction: 'Культурный волонтёр',
+        badge: 'Культура',
+        image: 'assets/remy.jpg',
+        description: 'Ты любознательный человек с хорошим чувством прекрасного. Твои сильные стороны: творческое мышление, любознательность и внимание к деталям. Тебе подойдут музеи, выставки, концерты, театры, экскурсии и творческие мастерские.',
+        superpower: 'Твоя суперсила: показывать знакомый мир с неожиданной стороны.'
+      },
+      media: {
+        name: 'Майк Вазовски',
+        direction: 'Медиаволонтёр',
+        badge: 'Медиа',
+        image: 'assets/mike.jpg',
+        description: 'Ты умеешь находить интересные истории и рассказывать о них так, чтобы люди захотели присоединиться. Твои сильные стороны: коммуникабельность, чувство юмора и креативность. Тебе подойдут фото и видео, дизайн, интервью, социальные сети, тексты и афиши.',
+        superpower: 'Твоя суперсила: превращать добрые дела в истории, которые вдохновляют других.'
+      },
+      social: {
+        name: 'Аанг',
+        direction: 'Социальный волонтёр',
+        badge: 'Помощь людям',
+        image: 'assets/aang.jpg',
+        description: 'Ты умеешь видеть ситуацию глазами другого человека. Твои сильные стороны: эмпатия, дипломатичность и умение находить общий язык с разными людьми. Тебе подойдут проекты для детей, пожилых людей, людей с инвалидностью и семей в трудной ситуации.',
+        superpower: 'Твоя суперсила: объединять людей добротой и доверием.'
+      }
+    };
+
+    const questions = [
+      {
+        text: 'В вашей группе решили устроить неформальную встречу. Что тебе было бы интереснее взять на себя?',
+        answers: [
+          ['Помочь выбрать время и место и собрать всех вместе.', 'event'],
+          ['Сделать забавное объявление и напомнить о встрече в чате.', 'media'],
+          ['Проследить, чтобы никто не чувствовал себя лишним.', 'social'],
+          ['Придумать необычную тему и атмосферу встречи.', 'culture']
+        ]
+      },
+      {
+        text: 'Как выглядит твой идеальный свободный вечер?',
+        answers: [
+          ['Прогулка по парку или поездка за город.', 'eco'],
+          ['Время с домашним питомцем или забавные видео о животных.', 'zoo'],
+          ['Узнать что-нибудь полезное о здоровье или первой помощи.', 'donor'],
+          ['Фильм, выставка, концерт или другое творческое открытие.', 'culture']
+        ]
+      },
+      {
+        text: 'В учебном проекте какую часть ты выберешь скорее всего?',
+        answers: [
+          ['Составить план и помочь всем уложиться в сроки.', 'event'],
+          ['Придумать идею, оформление и интересную презентацию.', 'media'],
+          ['Выслушать мнения и помочь команде договориться.', 'social'],
+          ['Навести порядок в материалах и проследить, чтобы ресурсы не тратились зря.', 'eco']
+        ]
+      },
+      {
+        text: 'Какой комплимент тебе особенно приятно было бы услышать?',
+        answers: [
+          ['«С тобой любое дело становится интереснее».', 'event'],
+          ['«Ты замечаешь важные мелочи и бережно относишься к миру».', 'eco'],
+          ['«Рядом с тобой спокойно, на тебя можно положиться».', 'social'],
+          ['«Ты умеешь так рассказать, что сразу хочется узнать больше».', 'media']
+        ]
+      },
+      {
+        text: 'Если бы в университете можно было добавить что-то одно, что бы ты выбрал?',
+        answers: [
+          ['Больше ярких встреч, праздников и студенческих активностей.', 'event'],
+          ['Больше зелёных зон, многоразовых вещей и удобной сортировки отходов.', 'eco'],
+          ['Уютное пространство, связанное с животными и заботой о них.', 'zoo'],
+          ['Полезные занятия о здоровье, безопасности и первой помощи.', 'donor']
+        ]
+      },
+      {
+        text: 'В вашей группе появился новый человек и пока немного теряется. Как ты поступишь?',
+        answers: [
+          ['Познакомлю его с ребятами и покажу, что где находится.', 'event'],
+          ['Отправлю ему короткий забавный путеводитель или мемы про учёбу.', 'media'],
+          ['Спокойно отвечу на вопросы и помогу разобраться с расписанием.', 'social'],
+          ['Позову прогуляться и покажу самые зелёные уголки и местных кампусных котов.', 'zoo']
+        ]
+      },
+      {
+        text: 'Какую свою способность ты считаешь наиболее сильной?',
+        answers: [
+          ['Умею организовать людей и быстро принимать решения.', 'event'],
+          ['Умею терпеливо заботиться о тех, кто мне доверяет.', 'zoo'],
+          ['Сохраняю спокойствие и не боюсь ответственных ситуаций.', 'donor'],
+          ['Вижу необычное в обычном и умею вдохновлять других.', 'culture']
+        ]
+      },
+      {
+        text: 'Какая фраза тебе ближе?',
+        answers: [
+          ['«Большие изменения начинаются с маленьких привычек».', 'eco'],
+          ['«Мы в ответе за тех, кого приручили».', 'zoo'],
+          ['«Самая важная помощь: та, которую оказывают вовремя».', 'donor'],
+          ['«Хорошая история способна изменить взгляд человека».', 'media']
+        ]
+      },
+      {
+        text: 'Какой сюжет ты бы выбрал для мультфильма о себе?',
+        answers: [
+          ['Я собираю совершенно разных героев и устраиваю грандиозное событие.', 'event'],
+          ['Я шаг за шагом возвращаю жизнь заброшенной планете.', 'eco'],
+          ['Я открываю место, где помогают всем животным.', 'zoo'],
+          ['Я помогаю людям стать здоровее и не бояться важных поступков.', 'donor'],
+          ['Я открываю людям новый мир через искусство, традиции и творчество.', 'culture'],
+          ['Я рассказываю историю, которая собирает тысячи просмотров и меняет мнение людей.', 'media'],
+          ['Я объединяю людей и помогаю им услышать друг друга.', 'social']
+        ]
+      }
+    ];
+
+    const screens = {
+      start: document.getElementById('start-screen'),
+      quiz: document.getElementById('quiz-screen'),
+      result: document.getElementById('result-screen')
+    };
+    const title = document.getElementById('question-title');
+    const answersEl = document.getElementById('answers');
+    const nextButton = document.getElementById('next-button');
+    const backButton = document.getElementById('back-button');
+    let current = 0;
+    let selections = Array(questions.length).fill(null);
+
+    function showScreen(name) {
+      Object.values(screens).forEach(screen => screen.classList.remove('active'));
+      screens[name].classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderQuestion() {
+      const question = questions[current];
+      const number = current + 1;
+      const percent = Math.round(number / questions.length * 100);
+      document.getElementById('progress-label').textContent = `Вопрос ${number} из ${questions.length}`;
+      document.getElementById('progress-percent').textContent = `${percent}%`;
+      document.getElementById('progress-bar').style.width = `${percent}%`;
+      title.textContent = question.text;
+      answersEl.innerHTML = '';
+
+      question.answers.forEach(([label, category], index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'answer' + (selections[current] === category ? ' selected' : '');
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-checked', selections[current] === category ? 'true' : 'false');
+        button.innerHTML = `<span class="answer-key">${String.fromCharCode(65 + index)}</span><span>${label}</span>`;
+        button.addEventListener('click', () => {
+          selections[current] = category;
+          [...answersEl.children].forEach(item => {
+            item.classList.remove('selected');
+            item.setAttribute('aria-checked', 'false');
+          });
+          button.classList.add('selected');
+          button.setAttribute('aria-checked', 'true');
+          nextButton.disabled = false;
+        });
+        answersEl.appendChild(button);
+      });
+
+      nextButton.disabled = !selections[current];
+      nextButton.textContent = current === questions.length - 1 ? 'Узнать результат' : 'Дальше';
+      backButton.disabled = current === 0;
+    }
+
+    function calculateResult() {
+      const scores = Object.fromEntries(Object.keys(categories).map(key => [key, 0]));
+      selections.forEach(key => { if (key) scores[key] += 1; });
+      const max = Math.max(...Object.values(scores));
+      const leaders = Object.keys(scores).filter(key => scores[key] === max);
+      const finalChoice = selections[selections.length - 1];
+      return leaders.includes(finalChoice) ? finalChoice : leaders[0];
+    }
+
+    function showResult() {
+      const key = calculateResult();
+      const result = categories[key];
+      const image = document.getElementById('result-image');
+      image.src = result.image;
+      image.alt = `${result.name}: ${result.direction}`;
+      document.getElementById('result-badge').textContent = result.badge;
+      document.getElementById('result-name').textContent = result.name;
+      document.getElementById('result-direction').textContent = result.direction;
+      document.getElementById('result-description').textContent = result.description;
+      document.getElementById('result-superpower').textContent = result.superpower;
+      showScreen('result');
+    }
+
+    document.getElementById('start-button').addEventListener('click', () => {
+      current = 0;
+      selections = Array(questions.length).fill(null);
+      renderQuestion();
+      showScreen('quiz');
+    });
+
+    nextButton.addEventListener('click', () => {
+      if (!selections[current]) return;
+      if (current < questions.length - 1) {
+        current += 1;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    backButton.addEventListener('click', () => {
+      if (current > 0) {
+        current -= 1;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById('restart-button').addEventListener('click', () => {
+      current = 0;
+      selections = Array(questions.length).fill(null);
+      renderQuestion();
+      showScreen('quiz');
+    });
+
+    document.getElementById('share-button').addEventListener('click', async () => {
+      const resultName = document.getElementById('result-name').textContent;
+      const resultDirection = document.getElementById('result-direction').textContent;
+      const shareData = {
+        title: 'Какой ты волонтёр?',
+        text: `Мой результат: ${resultName}, ${resultDirection}. А кто ты?`,
+        url: window.location.href
+      };
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+        } else {
+          await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+          const button = document.getElementById('share-button');
+          const original = button.textContent;
+          button.textContent = 'Ссылка скопирована';
+          setTimeout(() => { button.textContent = original; }, 1800);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') window.prompt('Скопируй ссылку на тест:', window.location.href);
+      }
+    });
+  </script>
+</body>
+</html>
